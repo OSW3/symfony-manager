@@ -1,0 +1,6 @@
+controllers: 
+    resource   : '@ManagerBundle/Controller/'
+    type       : attribute
+    prefix     : /manager
+    name_prefix: 'manager:'
+

@@ -13,6 +13,9 @@ following command to download the latest stable version of this bundle:
 composer require osw3/symfony-manager
 ```
 
+
+
+
 ### Step 2: Enable the Bundle
 
 Then, enable the bundle by adding it to the list of registered bundles
@@ -27,6 +30,4 @@ return [
 ];
 ```
 
-## How to use
 
-## How to configure

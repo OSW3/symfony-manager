@@ -54,7 +54,7 @@ class ManagerExtension extends Extension implements PrependExtensionInterface
         // --
 
         $twigConfig = [];
-		$this->extendsTwigConfig($twigConfig, Path::join(__DIR__, "/../../", "templates"), "Manager");
+		$this->extendsTwigConfig($twigConfig, Path::join(__DIR__, "/../../", "templates"), Configuration::NAME);
 
         $container->prependExtensionConfig('twig', $twigConfig);
     }
