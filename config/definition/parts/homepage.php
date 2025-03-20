@@ -19,7 +19,7 @@ $node
 
         ->scalarNode('label')
             ->info("Text label used for the homepage link.")
-            ->defaultValue('Back to homepage')
+            ->defaultValue('homepage.label')
         ->end()
 
     ->end();
