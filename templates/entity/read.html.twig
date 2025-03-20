@@ -1,0 +1,25 @@
+{% extends '@manager/base.html.twig' %}
+
+{% block title %}Hello HomepageController!{% endblock %}
+
+{% block body %}
+<h1>Entity read</h1>
+
+{# <div><strong>ID</strong> : {{ manager_entity_id(item) }}</div> #}
+
+<div><strong>Entity classname</strong> : {{ classname }}</div>
+<div><strong>current path</strong> : {{ path }}</div>
+<div><strong>ID</strong> : {{ id }}</div>
+
+{# {{ dump( manager_entity_attributes(entity) ) }} #}
+{# {{ dump( attributes ) }} #}
+
+<hr>
+{% for name, value in attributes %}
+<div>
+    <strong>{{ name }}</strong> : {{ value }}
+</div>
+{% endfor %}
+
+
+{% endblock %}

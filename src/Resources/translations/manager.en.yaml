@@ -1,2 +1,5 @@
 homepage:
     label: Back to homepage
+
+entity:
+    not_found: no records found

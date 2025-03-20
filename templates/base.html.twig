@@ -13,8 +13,19 @@
     <body>
 
         <nav>
+            <a href="{{ url('manager:dashboard') }}">Dashboard</a> - 
             <a href="{{ url( manager_homepage_route() ) }}">{{ manager_homepage_label() }}</a> - 
         </nav>
+        <hr>
+
+
+        <h3>Entities</h3>
+        {# {{ dump( manager_entities_nav_elements()) }} #}
+        {% for item in manager_entities_nav_elements() %}
+            <a href="{{ item.url }}">
+                {{ item.label }} {% if item.active %}(current){% endif %}
+            </a>
+        {% endfor %}
         <hr>
 
         {% block body %}{% endblock %}

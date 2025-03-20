@@ -1,0 +1,60 @@
+{% extends '@manager/base.html.twig' %}
+
+{% block title %}Hello HomepageController!{% endblock %}
+
+{% block body %}
+<h1>Entity {{ name }}</h1>
+
+<div>Entity classname : {{ classname }}</div>
+<div>current path : {{ path }}</div>
+<div>path index : {{ manager_entities_index_url(classname) }}</div>
+<div>path read : {{ manager_entity_read_url(classname, 42) }}</div>
+<div>name : {{ name }}</div>
+<div>name (twig) : {{ manager_entity_name(classname) }}</div>
+<div>singular name (twig) : {{ manager_entity_singular_name(classname) }}</div>
+
+
+<hr>
+<div><strong>Count</strong> : {{ count }}</div>
+<hr>
+{# {% for item in items %}
+<fieldset>
+    <legend>{{ manager_entity_title(item) }}</legend>
+    <article>
+        <div><strong>ID</strong> : {{ manager_entity_id(item) }}</div>
+        <div><strong>Title</strong> : {{ manager_entity_title(item) }}</div>
+    </article>
+</fieldset>
+{% else %}
+<p>{{ manager_entity_not_found(entity) | trans([], 'manager') }}</p>
+{% endfor %} #}
+
+
+
+{% if entities is not empty %}
+<table border="1">
+    <thead>
+        <tr>
+            {% for column in manager_entity_columns(entities[0]) %}
+            <th>{{ column.label }}</th>
+            {% endfor %}
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for entity in entities %}
+        <tr>
+            {% for column in manager_entity_columns(entity) %}
+            <td>{{ column.value }}</td>
+            {% endfor %}
+            {# <td><a href="{{ manager_entity_read_url(classname, entity.id) }}">read</a></td> #}
+            <td><a href="{{ manager_entity_read_url(classname, manager_entity_id(entity)) }}">read</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>{{ manager_entity_not_found(classname) | trans([], 'manager') }}</p>
+{% endif %}
+
+{% endblock %}

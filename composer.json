@@ -15,9 +15,13 @@
     "autoload": {
         "psr-4": {
             "OSW3\\Manager\\": "src/"
-        }
+        },
+        "files": [
+            "vendor/icanboogie/inflector/lib/helpers.php"
+        ]
     },
     "require": {
+        "icanboogie/inflector": "*",
         "symfony/translation": "*"
     }
 }
