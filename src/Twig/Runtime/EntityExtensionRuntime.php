@@ -86,6 +86,10 @@ class EntityExtensionRuntime implements RuntimeExtensionInterface
         return $this->entityService->label_ViewItem($classname);
     }
 
+    public function label_DeleteItem(string $classname): string {
+        return $this->entityService->label_DeleteItem($classname);
+    }
+
     public function label_NotFound(string $classname): string {
         return $this->entityService->label_NotFound($classname);
     }

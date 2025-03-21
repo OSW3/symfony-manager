@@ -3,8 +3,19 @@
 {% block title %}Hello HomepageController!{% endblock %}
 
 {% block body %}
-<h1>Entity Delete</h1>
+<h1>Entity Delete : {{ entityName }}</h1>
+<p>{{ 'action.deletion' | trans({ '%entityName%': entityName, '%propertyName%': propertyName }, 'manager') }}</p>
 
+<form action="{{ manager_entity_delete_url(classname, id) }}" method="POST">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ id) }}">
 
+    <button type="submit">{{ 'action.yes' | trans([], 'manager') }}</button>
+    <a href="{{ manager_entity_read_url(classname, id) }}">{{ 'action.no' | trans([], 'manager') }}</a>
+</form>
+
+{# <form method="post" action="{{ path('app_item_delete', {'id': item.id}) }}" onsubmit="return confirm('Are you sure you want to delete this item?');">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ item.id) }}">
+    <button class="btn">Delete</button>
+</form> #}
 
 {% endblock %}

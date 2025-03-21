@@ -32,6 +32,17 @@
             <a href="{{ item.url }}">{{ item.label }}</a> - 
         {% endfor %}
         <hr>
+
+        <h4>Flash message</h4>
+        {% for type, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    {# <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button> #}
+                </div>
+            {% endfor %}
+        {% endfor %}
+        <hr>
         {% block body %}{% endblock %}
     </body>
 </html>

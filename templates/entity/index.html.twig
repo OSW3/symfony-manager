@@ -3,7 +3,7 @@
 {% block title %}Hello HomepageController!{% endblock %}
 
 {% block body %}
-<h1>Entity index : {{ name }}</h1>
+<h1>Entity index : {{ entityName }}</h1>
 
 <div>Entity classname : {{ classname }}</div>
 {# <div>current path : {{ path }}</div> #}
@@ -12,13 +12,29 @@
 <div>URL read : {{ manager_entity_read_url(classname, 42) }}</div>
 <div>URL update : {{ manager_entity_edit_url(classname, 42) }}</div>
 <div>URL delete : {{ manager_entity_delete_url(classname, 42) }}</div>
-<div>name : {{ name }}</div>
+<div>name : {{ entityName }}</div>
 <div>name (twig) : {{ manager_entity_name(classname) }}</div>
 <div>singular name (twig) : {{ manager_entity_singular_name(classname) }}</div>
 
 
 <hr>
-<div><strong>Count</strong> : {{ count }}</div>
+<div><strong>Count</strong> : {{ total }}</div>
+
+<hr>
+
+
+
+{# Pagination #}
+{% if pages > 0 %}
+<nav>
+{% for page in 1..pages %}
+    <a href="{{ url('manager:entity:index', {
+        path: path,
+        page: page}) }}">{{ page }}</a> - 
+{% endfor %}
+</nav>
+{% endif %}
+
 <hr>
 {# {% for item in items %}
 <fieldset>
@@ -54,6 +70,8 @@
             <td>
                 <a href="{{ manager_entity_read_url(classname, manager_entity_id(entity)) }}">{{ manager_entity_label_view_item(classname) }}</a>
                 <a href="{{ manager_entity_edit_url(classname, manager_entity_id(entity)) }}">{{ manager_entity_label_edit_item(classname) }}</a>
+                <a href="{{ manager_entity_delete_url(classname, manager_entity_id(entity)) }}">{{ manager_entity_label_delete_item(classname) }}</a>
+
             </td>
         </tr>
         {% endfor %}

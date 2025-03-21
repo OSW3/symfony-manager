@@ -2,18 +2,9 @@
 
 use ICanBoogie\Inflector;
 use OSW3\Manager\Utils\StringUtil;
-use Symfony\Component\Config\Definition\Builder\NodeBuilder;
+use OSW3\Manager\Enum\RequestOperators;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
-use Symfony\Component\Config\Definition\Builder\ScalarNodeDefinition;
-
-if (!function_exists('path')) {
-function path(): ScalarNodeDefinition {
-    return (new ScalarNodeDefinition('path'))
-        ->info('xxx.')
-        ->defaultNull();
-}}
-
 
 
 return function (): ArrayNodeDefinition {
@@ -26,6 +17,18 @@ $node
     ->arrayPrototype()
     ->info('Specifies the namespace of the entity to be included in the search query (App\Entity\Pizza).')
     ->children()
+
+        ->scalarNode('id')
+            ->info('xxx.')
+            ->cannotBeEmpty()
+            ->defaultValue('id')
+        ->end()
+
+        ->scalarNode('name')
+            ->info('xxx.')
+            ->cannotBeEmpty()
+            ->defaultValue('name')
+        ->end()
 
         ->arrayNode('labels')
             ->info('xxx.')
@@ -40,6 +43,7 @@ $node
             // 'new_item'                 => 'Nouvel article',
             ->scalarNode('view_item')->defaultValue('entity.view_item')->end()
             ->scalarNode('view_items')->defaultValue('entity.view_items')->end()
+            ->scalarNode('delete_item')->defaultValue('entity.delete_item')->end()
             // 'search_items'             => 'Rechercher un article',
             ->scalarNode('not_found')->defaultValue('entity.not_found')->end()
             // 'not_found_in_trash'       => 'Aucun article trouvé dans la corbeille',
@@ -64,7 +68,6 @@ $node
 
         ->end()->end()
 
-
         ->arrayNode('index')
             ->info('xxx.')
             ->addDefaultsIfNotSet()->children()
@@ -80,8 +83,39 @@ $node
                 ->variablePrototype()->end()
             ->end()
 
-        ->end()->end()
+            ->integerNode('per_page')
+                ->info('xxx.')
+                ->defaultValue(10)
+            ->end()
 
+
+            ->arrayNode('orderBy')
+                ->info("xxx.")
+                ->ignoreExtraKeys(false)
+                ->variablePrototype()->end()
+            ->end()
+
+            ->arrayNode('criteria')
+                ->info('xxx.')
+                ->arrayPrototype()
+                ->info('xxx.')
+                ->children()
+
+                ->enumNode('operator')
+                    ->info('xxx.')
+                    ->values(RequestOperators::toArray())
+                    ->defaultValue(RequestOperators::LIKE->value)
+                ->end()
+
+                ->scalarNode('value')
+                    ->info('xxx.')
+                    ->isRequired()
+                    ->defaultNull()
+                ->end()
+
+            ->end()->end()->end()
+
+        ->end()->end()
 
         ->arrayNode('create')
             ->info('xxx.')
@@ -99,12 +133,11 @@ $node
 
             ->enumNode('redirect')
                 ->info('xxx.')
-                ->values(['read', 'index', 'edit'])
+                ->values(['index', 'create', 'read', 'edit'])
                 ->defaultValue('read')
             ->end()
             
         ->end()->end()
-
 
         ->arrayNode('read')
             ->info('xxx.')
@@ -116,7 +149,6 @@ $node
             ->end()
             
         ->end()->end()
-
 
         ->arrayNode('update')
             ->info('xxx.')
@@ -134,12 +166,11 @@ $node
 
             ->enumNode('redirect')
                 ->info('xxx.')
-                ->values(['read', 'index', 'edit'])
+                ->values(['index', 'read', 'edit'])
                 ->defaultValue('read')
             ->end()
             
         ->end()->end()
-
 
         ->arrayNode('delete')
             ->info('xxx.')
@@ -151,7 +182,6 @@ $node
             ->end()
             
         ->end()->end()
-
 
     ->end()->end();
 

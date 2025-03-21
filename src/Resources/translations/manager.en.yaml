@@ -2,9 +2,25 @@ homepage:
     label: Back to homepage
 
 entity:
-    add_new: Add a new %item%
-    edit_item: Edit %item%
-    view_item: Show %item%
+    add_new: Add a new %entityName%
+    edit_item: Edit %entityName%
+    view_item: Show %entityName%
     view_items: Show all %items%
-    not_found: no %item% found
+    delete_item: Delete %entityName%
+    not_found: No %entityName% found
     all_items: All %items%
+
+action:
+    yes: Yes
+    no: No
+    save: Save
+    update: Update
+    cancel: Cancel
+    deletion: Confirm deletion of %entityName% (%propertyName%) ?
+
+flash:
+    create_success: The %entityName% (%propertyName%) has been successfully created.
+    create_error: An error has occurred, please check the form.
+    update_success: The %entityName% (%propertyName%) has been successfully edited.
+    update_error: An error has occurred, please check the form.
+    delete_success: The %entityName% (%propertyName%) has been successfully deleted.

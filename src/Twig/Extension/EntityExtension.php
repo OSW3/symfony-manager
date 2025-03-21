@@ -76,6 +76,9 @@ class EntityExtension extends AbstractExtension
             // manager_entity_label_view_items
             new TwigFunction(Configuration::NAME."_entity_label_view_items", [EntityExtensionRuntime::class, 'label_ViewItems']),
 
+            // manager_entity_label_delete_item
+            new TwigFunction(Configuration::NAME."_entity_label_delete_item", [EntityExtensionRuntime::class, 'label_DeleteItem']),
+
             // manager_entity_label_not_found
             new TwigFunction(Configuration::NAME."_entity_label_not_found", [EntityExtensionRuntime::class, 'label_NotFound']),
 

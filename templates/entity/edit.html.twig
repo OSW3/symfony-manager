@@ -3,15 +3,17 @@
 {% block title %}Hello HomepageController!{% endblock %}
 
 {% block body %}
-<h1>Entity edit : {{ name }}</h1>
+<h1>Entity edit : {{ entityName }}</h1>
 
 
 <a href="{{ manager_entities_index_url(classname) }}">{{ manager_entity_label_all_items(classname) }}</a> - 
 <a href="{{ manager_entities_create_url(classname) }}">{{ manager_entity_label_add_new(classname) }}</a> - 
-<a href="#">{{ manager_entity_label_view_item(classname) }}</a>
+<a href="{{ manager_entity_read_url(classname, id) }}">{{ manager_entity_label_view_item(classname) }}</a> - 
+<a href="{{ manager_entity_delete_url(classname, id) }}">{{ manager_entity_label_delete_item(classname) }}</a>
+
 <hr>
 
 {% include "@manager/entity/_form.html.twig" with {
-    button_label: 'Update'
+    button_label: 'action.update' | trans([], 'manager')
 }%}
 {% endblock %}
