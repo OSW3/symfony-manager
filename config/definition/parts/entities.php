@@ -34,18 +34,17 @@ $node
             ->scalarNode('name')->defaultNull()->end()
             ->scalarNode('singular_name')->defaultNull()->end()
             ->scalarNode('menu_label')->defaultNull()->end()
-            // 'add_new'                  => 'Ajouter un nouvel article',
+            ->scalarNode('add_new')->defaultValue('entity.add_new')->end()
             // 'add_new_item'             => 'Ajouter un nouvel article',
-            // 'edit_item'                => 'Modifier l’article',
+            ->scalarNode('edit_item')->defaultValue('entity.edit_item')->end()
             // 'new_item'                 => 'Nouvel article',
-            // 'view_item'                => 'Voir l’article',
-            // 'view_items'               => 'Voir les articles',
+            ->scalarNode('view_item')->defaultValue('entity.view_item')->end()
+            ->scalarNode('view_items')->defaultValue('entity.view_items')->end()
             // 'search_items'             => 'Rechercher un article',
-            // 'not_found'                => 'Aucun article trouvé',
             ->scalarNode('not_found')->defaultValue('entity.not_found')->end()
             // 'not_found_in_trash'       => 'Aucun article trouvé dans la corbeille',
             // 'parent_item_colon'        => 'Article parent:',
-            // 'all_items'                => 'Tous les articles',
+            ->scalarNode('all_items')->defaultValue('entity.all_items')->end()
             // 'archives'                 => 'Archives des articles',
             // 'attributes'               => 'Attributs de l’article',
             // 'insert_into_item'         => 'Insérer dans l’article',
@@ -92,6 +91,17 @@ $node
                 ->info('xxx.')
                 ->defaultNull()
             ->end()
+
+            ->scalarNode('formtype')
+                ->info('xxx.')
+                ->defaultNull()
+            ->end()
+
+            ->enumNode('redirect')
+                ->info('xxx.')
+                ->values(['read', 'index', 'edit'])
+                ->defaultValue('read')
+            ->end()
             
         ->end()->end()
 
@@ -115,6 +125,17 @@ $node
             ->scalarNode('path')
                 ->info('xxx.')
                 ->defaultNull()
+            ->end()
+
+            ->scalarNode('formtype')
+                ->info('xxx.')
+                ->defaultNull()
+            ->end()
+
+            ->enumNode('redirect')
+                ->info('xxx.')
+                ->values(['read', 'index', 'edit'])
+                ->defaultValue('read')
             ->end()
             
         ->end()->end()
@@ -147,6 +168,25 @@ $node
             $entityPlural   = $inflector->pluralize($entityName);
             $entitySingular = $inflector->singularize($entityName);
             
+            // Paths
+
+            if ($entities[$entity]['index']['path'] === null) {
+                $entities[$entity]['index']['path']  = StringUtil::camelToSlug(strtolower($entityPlural));
+            }
+            if ($entities[$entity]['create']['path'] === null) {
+                $entities[$entity]['create']['path'] = StringUtil::camelToSlug(strtolower($entitySingular));
+            }
+            if ($entities[$entity]['read']['path'] === null) {
+                $entities[$entity]['read']['path']   = StringUtil::camelToSlug(strtolower($entitySingular));
+            }
+            if ($entities[$entity]['update']['path'] === null) {
+                $entities[$entity]['update']['path'] = StringUtil::camelToSlug(strtolower($entitySingular));
+            }
+            if ($entities[$entity]['delete']['path'] === null) {
+                $entities[$entity]['delete']['path'] = StringUtil::camelToSlug(strtolower($entitySingular));
+            }
+
+            // Labels
 
             if ($entities[$entity]['labels']['name'] === null) {
                 $entities[$entity]['labels']['name'] = $entityPlural;
@@ -158,11 +198,6 @@ $node
                 $entities[$entity]['labels']['menu_label'] = $entityPlural;
             }
 
-            $entities[$entity]['index']['path']  = StringUtil::camelToSlug(strtolower($entityPlural));
-            $entities[$entity]['create']['path'] = StringUtil::camelToSlug(strtolower($entitySingular));
-            $entities[$entity]['read']['path']   = StringUtil::camelToSlug(strtolower($entitySingular));
-            $entities[$entity]['update']['path'] = StringUtil::camelToSlug(strtolower($entitySingular));
-            $entities[$entity]['delete']['path'] = StringUtil::camelToSlug(strtolower($entitySingular));
         }
 
         return $entities;

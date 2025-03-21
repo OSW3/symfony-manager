@@ -3,8 +3,12 @@
 {% block title %}Hello HomepageController!{% endblock %}
 
 {% block body %}
-<h1>Entity Create</h1>
+<h1>Entity create : {{ name }}</h1>
 
 
+<a href="{{ manager_entities_index_url(classname) }}">{{ manager_entity_label_all_items(classname) }}</a> - 
+<hr>
+
+{% include "@manager/entity/_form.html.twig" %}
 
 {% endblock %}

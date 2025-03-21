@@ -3,18 +3,23 @@
 {% block title %}Hello HomepageController!{% endblock %}
 
 {% block body %}
-<h1>Entity read</h1>
+<h1>Entity read : {{ name }}</h1>
+
+
+<a href="{{ manager_entities_index_url(classname) }}">{{ manager_entity_label_all_items(classname) }}</a> - 
+<a href="{{ manager_entities_create_url(classname) }}">{{ manager_entity_label_add_new(classname) }}</a> - 
+<a href="{{ manager_entity_edit_url(classname, id) }}">{{ manager_entity_label_edit_item(classname) }}</a>
+<hr>
 
 {# <div><strong>ID</strong> : {{ manager_entity_id(item) }}</div> #}
-
-<div><strong>Entity classname</strong> : {{ classname }}</div>
-<div><strong>current path</strong> : {{ path }}</div>
-<div><strong>ID</strong> : {{ id }}</div>
+{# <div><strong>Entity classname</strong> : {{ classname }}</div> #}
+{# <div><strong>current path</strong> : {{ path }}</div> #}
+{# <div><strong>ID</strong> : {{ id }}</div> #}
+{# <hr> #}
 
 {# {{ dump( manager_entity_attributes(entity) ) }} #}
 {# {{ dump( attributes ) }} #}
 
-<hr>
 {% for name, value in attributes %}
 <div>
     <strong>{{ name }}</strong> : {{ value }}

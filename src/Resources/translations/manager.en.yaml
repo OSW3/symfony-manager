@@ -2,4 +2,9 @@ homepage:
     label: Back to homepage
 
 entity:
-    not_found: no records found
+    add_new: Add a new %item%
+    edit_item: Edit %item%
+    view_item: Show %item%
+    view_items: Show all %items%
+    not_found: no %item% found
+    all_items: All %items%

@@ -3,6 +3,7 @@ namespace OSW3\Manager\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
 use OSW3\Manager\DependencyInjection\Configuration;
+use OSW3\Manager\Utils\StringUtil;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -67,6 +68,30 @@ class EntityService
 
         return $nav;
     }
+    
+    public function getNavCreateElements(): array {
+        $nav = [];
+
+        foreach($this->params as $classname => $options) {
+
+            $route    = 'manager:entity:create';
+            $path     = $options['create']['path'];
+            $url      = $this->urlGenerator->generate($route, ['path' => $path]);
+            $formtype = $this->getFormType($classname, false);
+            // $active = $this->isMenuActive($entity);
+
+            if (class_exists($formtype)) {
+                $nav[] = [
+                    'label'  => $this->label_AddNew($classname),
+                    'url'    => $url,
+                    // 'active' => $active,
+                ];
+            }
+
+        }
+
+        return $nav;
+    }
 
     private function isMenuActive(string $classname): bool {
         $options      = $this->params[$classname];
@@ -75,17 +100,40 @@ class EntityService
         $currentRoute = $request->attributes->get('_route');
         $currentPath  = $request->attributes->get('path');
 
-        $routeMatch   = in_array($currentRoute, ['manager:entity:index', 'manager:entity:read']);
-        $pathMatch    = in_array($currentPath, [$options['index']['path'], $options['read']['path']]);
+        $routeMatch   = in_array($currentRoute, [
+                            'manager:entity:index', 
+                            'manager:entity:create', 
+                            'manager:entity:read',
+                            'manager:entity:update',
+                            'manager:entity:delete'
+                        ]);
+        $pathMatch    = in_array($currentPath, [
+                            $options['index']['path'], 
+                            $options['create']['path'],
+                            $options['read']['path'],
+                            $options['update']['path'],
+                            $options['delete']['path']
+                        ]);
 
         return $routeMatch && $pathMatch;
     }
+
+
+    // urls
 
     public function getIndexUrl(string $classname): string {
         $options = $this->params[$classname];
 
         return $this->urlGenerator->generate('manager:entity:index', [
             'path' => $options['index']['path']
+        ], false);
+    }
+
+    public function getCreateUrl(string $classname): string {
+        $options = $this->params[$classname];
+
+        return $this->urlGenerator->generate('manager:entity:create', [
+            'path' => $options['create']['path']
         ], false);
     }
 
@@ -98,19 +146,37 @@ class EntityService
         ], false);
     }
 
+    public function getUpdateUrl(string $classname, int|string $id): string {
+        $options = $this->params[$classname];
+
+        return $this->urlGenerator->generate('manager:entity:update', [
+            'path' => $options['update']['path'],
+            'id' => $id,
+        ], false);
+    }
+
+    public function getDeleteUrl(string $classname, int|string $id): string {
+        $options = $this->params[$classname];
+
+        return $this->urlGenerator->generate('manager:entity:delete', [
+            'path' => $options['delete']['path'],
+            'id' => $id,
+        ], false);
+    }
+
 
 
     // SINGLE ENTITIES
     // --
 
     public function getEntityClassnameByPath(string $path): ?string {
+
         foreach ($this->params as $entity => $options) {
-            if ($options['index']['path'] === $path) {
-                return $entity;
-            }
-            else if ($options['read']['path'] === $path) {
-                return $entity;
-            }
+                 if ($options['index']['path'] === $path) return $entity;
+            else if ($options['create']['path'] === $path) return $entity;
+            else if ($options['read']['path'] === $path) return $entity;
+            else if ($options['update']['path'] === $path) return $entity;
+            else if ($options['delete']['path'] === $path) return $entity;
         }
 
         return null;
@@ -121,7 +187,7 @@ class EntityService
      * 
      * @return array
      */
-    private function getEntityOptions(string $classname): array {
+    public function getEntityOptions(string $classname): array {
         return $this->params[$classname];
     }
 
@@ -174,6 +240,16 @@ class EntityService
         return $attributes;
     }
 
+    public function getFormType(string $classname, bool $withException=true) {
+        $options  = $this->params[$classname];
+        $formType = $options['create']['formtype'] ?? str_replace('Entity', 'Form', $classname) . 'Type';
+
+        if ($withException && !class_exists($formType)) {
+            throw new \Exception(sprintf("The FormType %s is not found for the entity %s", $formType, $classname));
+        }
+
+        return $formType;
+    }
 
 
 
@@ -205,8 +281,49 @@ class EntityService
         return $options['labels']['menu_label'];
     }
 
-    public function getNotFound(string $classname): string {
+    public function label_AddNew(string $classname): string {
         $options = $this->getEntityOptions($classname);
-        return $options['labels']['not_found'];
+        // $word    = StringUtil::addArticle($this->getSingularName($classname));
+        $word    = strtolower($this->getSingularName($classname));
+        return   $this->translation->trans($options['labels']['add_new'], [
+                    '%item%' => $word
+                ], Configuration::DOMAIN);
+    }
+
+    public function label_EditItem(string $classname): string {
+        $options = $this->getEntityOptions($classname);
+        $word    = strtolower($this->getSingularName($classname));
+        return   $this->translation->trans($options['labels']['edit_item'], [
+                    '%item%' => $word
+                ], Configuration::DOMAIN);
+    }
+
+    public function label_ViewItems(string $classname): string {
+        $options = $this->getEntityOptions($classname);
+        return     $this->translation->trans($options['labels']['view_items'], [
+                        '%items%' => strtolower($this->getName($classname)),
+                    ], Configuration::DOMAIN);
+    }
+
+    public function label_ViewItem(string $classname): string {
+        $options = $this->getEntityOptions($classname);
+        return     $this->translation->trans($options['labels']['view_item'], [
+                        '%item%' => strtolower($this->getSingularName($classname)),
+                    ], Configuration::DOMAIN);
+    }
+
+    public function label_NotFound(string $classname): string {
+        $options = $this->getEntityOptions($classname);
+        return     $this->translation->trans($options['labels']['not_found'], [
+                        '%item%' => strtolower($this->getSingularName($classname)),
+                    ], Configuration::DOMAIN);
+    }
+
+    public function label_AllItems(string $classname): string {
+        $options = $this->getEntityOptions($classname);
+        $word    = strtolower($this->getName($classname));
+        return   $this->translation->trans($options['labels']['all_items'], [
+                    '%items%' => $word
+                ], Configuration::DOMAIN);
     }
 }

@@ -22,12 +22,16 @@
         <h3>Entities</h3>
         {# {{ dump( manager_entities_nav_elements()) }} #}
         {% for item in manager_entities_nav_elements() %}
-            <a href="{{ item.url }}">
-                {{ item.label }} {% if item.active %}(current){% endif %}
-            </a>
+            <a href="{{ item.url }}">{{ item.label }}{% if item.active %} (current){% endif %}</a> - 
         {% endfor %}
         <hr>
 
+        <h4>New</h4>
+        <div><small>No menu if form don't exists</small></div>
+        {% for item in manager_entities_nav_create_elements() %}
+            <a href="{{ item.url }}">{{ item.label }}</a> - 
+        {% endfor %}
+        <hr>
         {% block body %}{% endblock %}
     </body>
 </html>
