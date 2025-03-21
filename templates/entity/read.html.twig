@@ -20,12 +20,12 @@
 {# <hr> #}
 
 {# {{ dump( manager_entity_attributes(entity) ) }} #}
-{# {{ dump( attributes ) }} #}
+{{ dump( attributes ) }}
 
 
-{% for name, value in attributes %}
+{% for attribute in attributes %}
 <div>
-    <strong>{{ name }}</strong> : {{ value }}
+    <strong> {{ attribute['label'] }}  ({{ attribute['property'] }}) </strong> : {{ attribute['value'] }}
 </div>
 {% endfor %}
 

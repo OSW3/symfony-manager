@@ -36,9 +36,6 @@ final class EntityController extends AbstractController
                             : $entityService->getSingularName($this->classname);
     }
 
-
-
-
     #[Route('', name: 'index')]
     public function index(): Response
     {

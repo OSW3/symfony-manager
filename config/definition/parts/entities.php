@@ -88,7 +88,6 @@ $node
                 ->defaultValue(10)
             ->end()
 
-
             ->arrayNode('orderBy')
                 ->info("xxx.")
                 ->ignoreExtraKeys(false)
@@ -146,6 +145,12 @@ $node
             ->scalarNode('path')
                 ->info('xxx.')
                 ->defaultNull()
+            ->end()
+
+            ->arrayNode('attributes')
+                ->info("xxx.")
+                ->ignoreExtraKeys(false)
+                ->variablePrototype()->end()
             ->end()
             
         ->end()->end()

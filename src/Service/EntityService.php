@@ -248,112 +248,6 @@ class EntityService
         return (int) ceil($total/$limit);
     }
 
-
-
-
-
-
-    private function parseDateExpression($value) {
-        $pattern = '/^(NOW|\d{2}-\d{2}-\d{4}(?: \d{2}:\d{2}:\d{2})?)\s*([\+\-])\s*(\d+)\s*(days|weeks|months|years|hours|minutes|seconds)$/i';
-        
-        if (preg_match($pattern, $value, $matches)) {
-            $baseDate = strtoupper($matches[1]) === 'NOW' ? date('Y-m-d H:i:s') : date('Y-m-d H:i:s', strtotime($matches[1]));
-            $modifier = "{$matches[2]}{$matches[3]} {$matches[4]}";
-    
-            return date('Y-m-d H:i:s', strtotime("$modifier", strtotime($baseDate)));
-        }
-        
-        return $value;
-    }
-    private function where(&$query, $property, $operator, $value) {
-
-        $value = $this->parseDateExpression($value);
-        // dump($value);
-
-        $query->andWhere('p.' . $property . match($operator) {
-            RequestOperators::LIKE->value           => " LIKE '%{$value}%'",
-            RequestOperators::LEFT_LIKE->value      => " LIKE '%{$value}'",
-            RequestOperators::RIGHT_LIKE->value     => " LIKE '{$value}%'",
-            RequestOperators::NOT_LIKE->value       => " NOT LIKE '%{$value}%'",
-            RequestOperators::NOT_LEFT_LIKE->value  => " NOT LIKE '%{$value}'",
-            RequestOperators::NOT_RIGHT_LIKE->value => " NOT LIKE '{$value}%'",
-            RequestOperators::IS_NOT->value         => " != '{$value}'",
-            RequestOperators::EQUAL->value          => " = '{$value}'",
-            RequestOperators::GREATER->value        => " > '{$value}'",
-            RequestOperators::LESS->value           => " < '{$value}'",
-            RequestOperators::GREATER_EQUAL->value  => " >= '{$value}'",
-            RequestOperators::LESS_EQUAL->value     => " <= '{$value}'",
-            RequestOperators::IN->value             => " IN ('{$value}')",
-            RequestOperators::BETWEEN->value        => " BETWEEN '{$value[0]}' AND '{$value[1]}'",
-            RequestOperators::IS_NULL->value        => " IS NULL",
-            RequestOperators::IS_NOT_NULL->value    => " IS NOT NULL",
-            default                                 => " = '{$value}'",
-        });
-    }
-    
-    private function findBy($repository, string $classname, array $criteria, array|null $orderBy = null, int|null $limit = null, int|null $offset = null): array
-    {
-
-        // $entityShortName = (new \ReflectionClass($classname))->getShortName();
-        $dql             = "SELECT e FROM $classname e WHERE 1=1";
-        // $parameters      = [];
-
-
-        foreach ($criteria as $property => $options) {
-            $operator = $options['operator'];
-            $value    = $options['value'];
-
-            $operator = match($options['operator']) {
-                RequestOperators::LIKE->value           => "LIKE '%{$value}%'",
-                RequestOperators::LEFT_LIKE->value      => "LIKE '%{$value}'",
-                RequestOperators::RIGHT_LIKE->value     => "LIKE '{$value}%'",
-                RequestOperators::NOT_LIKE->value       => "NOT LIKE '%{$value}%'",
-                RequestOperators::NOT_LEFT_LIKE->value  => "NOT LIKE '%{$value}'",
-                RequestOperators::NOT_RIGHT_LIKE->value => "NOT LIKE '{$value}%'",
-                RequestOperators::IS_NOT->value         => "!= '{$value}'",
-                RequestOperators::EQUAL->value          => "= '{$value}'",
-                RequestOperators::GREATER->value        => "> '{$value}'",
-                RequestOperators::LESS->value           => "< '{$value}'",
-                RequestOperators::GREATER_EQUAL->value  => ">= '{$value}'",
-                RequestOperators::LESS_EQUAL->value     => "<= '{$value}'",
-                RequestOperators::IN->value             => "IN ('{$value}')",
-                RequestOperators::BETWEEN->value        => "BETWEEN '{$value[0]}' AND '{$value[1]}'",
-                RequestOperators::IS_NULL->value        => "IS NULL",
-                RequestOperators::IS_NOT_NULL->value    => "IS NOT NULL",
-                default                                 => "= '{$value}'",
-            };
-
-            $dql.= " AND e.$property $operator ";
-        }
-
-
-
-        // Ajouter le tri
-        if (!empty($orderBy)) {
-            $orderParts = [];
-            foreach ($orderBy as $property => $direction) {
-                $orderParts[] = "e.$property $direction";
-            }
-            $dql .= " ORDER BY " . implode(', ', $orderParts);
-        }
-
-
-
-        $query = $this->entityManager->createQuery($dql);
-        // foreach ($parameters as $key => $value) {
-        //     $query->setParameter($key, $value);
-        // }
-
-        if ($limit !== null) {
-            $query->setMaxResults($limit);
-        }
-        if ($offset !== null) {
-            $query->setFirstResult($offset);
-        }
-
-        return $query->getResult();
-    }
-
     public function getColumns(object $entity): array {
         $options = $this->params[$entity::class];
         $columns = $options['index']['columns'];
@@ -376,15 +270,28 @@ class EntityService
 
     public function getAttributes(object $entity): array {
 
-        $reflection = new \ReflectionClass($entity);
-        $attributes = [];
+        $classname         = $entity::class;
+        $options           = $this->getEntityOptions($classname);
+        $reflection        = new \ReflectionClass($entity);
+        $allowedAttributes = $options['read']['attributes'];
+        $attributes        = [];
 
         foreach ($reflection->getProperties() as $property) {
-            $propertyName = $property->getName();
-            $getter = 'get' . ucfirst($propertyName);
+            $attribute   = $property->getName();
+            $getter = 'get'.ucfirst($attribute);
+
+            if (!empty($allowedAttributes) && !array_key_exists($attribute, $allowedAttributes)) {
+                continue;
+            }
+
+            $label = $allowedAttributes[$attribute]['label'] ?? $attribute;
 
             if (method_exists($entity, $getter)) {
-                $attributes[$propertyName] = $entity->$getter();
+                $attributes[$attribute] = [
+                    'property' => $attribute,
+                    'label'    => $label,
+                    'value'    => $entity->$getter()
+                ];
             }
         }
 
@@ -486,5 +393,81 @@ class EntityService
         return   $this->translation->trans($options['labels']['all_items'], [
                     '%items%' => $word
                 ], Configuration::DOMAIN);
+    }
+
+
+    // DQL
+    // --
+
+    private function parseDateExpression($value) {
+        $pattern = '/^(NOW|\d{2}-\d{2}-\d{4}(?: \d{2}:\d{2}:\d{2})?)\s*([\+\-])\s*(\d+)\s*(days|weeks|months|years|hours|minutes|seconds)$/i';
+        
+        if (preg_match($pattern, $value, $matches)) {
+            $baseDate = strtoupper($matches[1]) === 'NOW' ? date('Y-m-d H:i:s') : date('Y-m-d H:i:s', strtotime($matches[1]));
+            $modifier = "{$matches[2]}{$matches[3]} {$matches[4]}";
+    
+            return date('Y-m-d H:i:s', strtotime("$modifier", strtotime($baseDate)));
+        }
+        
+        return $value;
+    }
+    private function findBy($repository, string $classname, array $criteria, array|null $orderBy = null, int|null $limit = null, int|null $offset = null): array
+    {
+        $dql = "SELECT e FROM $classname e WHERE 1=1";
+
+        foreach ($criteria as $property => $options) {
+            $operator = $options['operator'];
+            $value    = $options['value'];
+            $value    = $this->parseDateExpression($value);
+
+            $operator = match($options['operator']) {
+                RequestOperators::LIKE->value           => "LIKE '%{$value}%'",
+                RequestOperators::LEFT_LIKE->value      => "LIKE '%{$value}'",
+                RequestOperators::RIGHT_LIKE->value     => "LIKE '{$value}%'",
+                RequestOperators::NOT_LIKE->value       => "NOT LIKE '%{$value}%'",
+                RequestOperators::NOT_LEFT_LIKE->value  => "NOT LIKE '%{$value}'",
+                RequestOperators::NOT_RIGHT_LIKE->value => "NOT LIKE '{$value}%'",
+                RequestOperators::IS_NOT->value         => "!= '{$value}'",
+                RequestOperators::EQUAL->value          => "= '{$value}'",
+                RequestOperators::GREATER->value        => "> '{$value}'",
+                RequestOperators::LESS->value           => "< '{$value}'",
+                RequestOperators::GREATER_EQUAL->value  => ">= '{$value}'",
+                RequestOperators::LESS_EQUAL->value     => "<= '{$value}'",
+                RequestOperators::IN->value             => "IN ('{$value}')",
+                RequestOperators::BETWEEN->value        => "BETWEEN '{$value[0]}' AND '{$value[1]}'",
+                RequestOperators::IS_NULL->value        => "IS NULL",
+                RequestOperators::IS_NOT_NULL->value    => "IS NOT NULL",
+                default                                 => "= '{$value}'",
+            };
+
+            $dql.= " AND e.$property $operator ";
+        }
+
+
+
+        // Ajouter le tri
+        if (!empty($orderBy)) {
+            $orderParts = [];
+            foreach ($orderBy as $property => $direction) {
+                $orderParts[] = "e.$property $direction";
+            }
+            $dql .= " ORDER BY " . implode(', ', $orderParts);
+        }
+
+
+
+        $query = $this->entityManager->createQuery($dql);
+        // foreach ($parameters as $key => $value) {
+        //     $query->setParameter($key, $value);
+        // }
+
+        if ($limit !== null) {
+            $query->setMaxResults($limit);
+        }
+        if ($offset !== null) {
+            $query->setFirstResult($offset);
+        }
+
+        return $query->getResult();
     }
 }
