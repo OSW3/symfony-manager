@@ -271,31 +271,107 @@ class EntityService
     public function getAttributes(object $entity): array {
 
         $classname         = $entity::class;
+
+        // Note: :-s
+        if (str_starts_with($classname, "Proxies\\__CG__\\")) {
+            $classname = str_replace("Proxies\\__CG__\\", "", $classname);
+        }
+
         $options           = $this->getEntityOptions($classname);
         $reflection        = new \ReflectionClass($entity);
         $allowedAttributes = $options['read']['attributes'];
         $attributes        = [];
 
         foreach ($reflection->getProperties() as $property) {
-            $attribute   = $property->getName();
-            $getter = 'get'.ucfirst($attribute);
+            $name   = $property->getName();
 
-            if (!empty($allowedAttributes) && !array_key_exists($attribute, $allowedAttributes)) {
-                continue;
+            // TODO: Exit control from "read" page
+            // if (!empty($allowedAttributes) && !array_key_exists($name, $allowedAttributes)) {
+            //     continue;
+            // }
+
+            if (str_starts_with($name, 'is') || str_starts_with($name, 'has')) {
+                $getter = ucfirst($name);
+            } else {
+                $getter = 'get' . ucfirst($name);
             }
 
-            $label = $allowedAttributes[$attribute]['label'] ?? $attribute;
+            $label      = $allowedAttributes[$name]['label'] ?? $name;
+            $format     = $allowedAttributes[$name]['format'] ?? null;
+            $attr = $allowedAttributes[$name]['attributes'] ?? [];
+            $type       = $property->getType()->getName();
+
+            $value  = $this->normalizeValue(
+                value : $entity->$getter(),
+                type  : $type,
+                format: $format,
+                attributes: $attr,
+            );
 
             if (method_exists($entity, $getter)) {
-                $attributes[$attribute] = [
-                    'property' => $attribute,
-                    'label'    => $label,
-                    'value'    => $entity->$getter()
+                $attributes[$name] = [
+                    'name'  => $name,
+                    'label' => $label,
+                    'value' => $value,
+                    'type'  => $type,
                 ];
             }
         }
 
         return $attributes;
+    }
+
+    private function normalizeValue(mixed $value, string $type, ?string $format = null, array $attributes=[]): ?string {
+
+        if ($value === null) {
+            return null;
+        }
+
+        if ($type === null || $type === 'string') {
+            return $value;
+        }
+
+        switch ($type) {
+            case 'bool': 
+                return (bool) $value;
+
+            case 'int' : 
+                return (int) $value;
+
+            case 'DateTimeInterface' : 
+            case 'DateTimeImmutable' : 
+                return $format 
+                    ? $value?->format($format) 
+                    : $value?->format('Y-m-d H:i:s')
+                ;
+        }
+
+        if (class_exists($type)) {
+
+            // TODO: Format ty data / get entity value
+            // $repository = $this->getRepository($type);
+
+            // dump($format);
+            // dd($value->getId());
+
+
+            // Vérifie si l'objet a une méthode __toString()
+            // if (method_exists($value, '__toString')) {
+            //     $value = (string) $value;
+            // dump($value);
+
+            // }
+
+            dump($value);
+            dump($attributes);
+            // dump($this->getAttributes($value));
+            // dump($value->getContent());
+
+
+            return "Entity data";
+        }
+
+        return $value;
     }
 
     public function getIdAttribute(string $classname): string {

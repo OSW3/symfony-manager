@@ -104,13 +104,16 @@ final class EntityController extends AbstractController
     {
         $entity     = $this->repository->find($id);
         $attributes = $this->entityService->getAttributes($entity);
+        $options    = $this->entityService->getEntityOptions($this->classname);
+        $nameGetter = "get".ucfirst($options['name']);
 
         return $this->render('@manager/entity/read.html.twig', [
-            'entityName' => $this->entityName,
-            'classname'  => $this->classname,
-            'id'         => $id,
-            'entity'     => $entity,
-            'attributes' => $attributes,
+            'entityName'   => $this->entityName,
+            'propertyName' => $entity->$nameGetter(),
+            'classname'    => $this->classname,
+            'id'           => $id,
+            'entity'       => $entity,
+            'attributes'   => $attributes,
             // 'path'       => $this->currentPath,
         ]);
     }

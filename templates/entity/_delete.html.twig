@@ -1,0 +1,5 @@
+
+<form action="{{ manager_entity_delete_url(classname, id) }}" method="POST" onsubmit="return confirm('{{ 'action.deletion' | trans({ '%entityName%': entityName, '%propertyName%': propertyName }, 'manager') }}');">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ id) }}">
+    <button type="submit">{{ 'action.delete' | trans([], 'manager') }}</button>
+</form>

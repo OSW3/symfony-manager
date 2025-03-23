@@ -16,6 +16,7 @@ action:
     save: Save
     update: Update
     cancel: Cancel
+    delete: Delete
     deletion: Confirm deletion of %entityName% (%propertyName%) ?
 
 flash:

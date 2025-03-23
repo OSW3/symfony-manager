@@ -11,6 +11,8 @@
 <a href="{{ manager_entities_create_url(classname) }}">{{ manager_entity_label_add_new(classname) }}</a> - 
 <a href="{{ manager_entity_edit_url(classname, id) }}">{{ manager_entity_label_edit_item(classname) }}</a> - 
 <a href="{{ manager_entity_delete_url(classname, id) }}">{{ manager_entity_label_delete_item(classname) }}</a>
+
+{% include "@manager/entity/_delete.html.twig" %}
 <hr>
 
 {# <div><strong>ID</strong> : {{ manager_entity_id(item) }}</div> #}
@@ -20,13 +22,27 @@
 {# <hr> #}
 
 {# {{ dump( manager_entity_attributes(entity) ) }} #}
-{{ dump( attributes ) }}
+{# {{ dump( entity ) }}
+{{ dump( attributes ) }} #}
 
+<table border="1">
+    <tbody>
+    {% for attribute in attributes %}
+        <tr>
+            <th>{{ attribute.label }}</th>
+            <td>{{ attribute.value }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
 
+<hr>
 {% for attribute in attributes %}
-<div>
-    <strong> {{ attribute['label'] }}  ({{ attribute['property'] }}) </strong> : {{ attribute['value'] }}
-</div>
+<div><strong>Name</strong> : {{ attribute.name }}</div>
+<div><strong>Label</strong> : {{ attribute.label }}</div>
+<div><strong>Value</strong> : {{ attribute.value }}</div>
+<div><strong>Type</strong> : {{ attribute.type }}</div>
+<hr>
 {% endfor %}
 
 

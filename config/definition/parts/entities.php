@@ -150,7 +150,16 @@ $node
             ->arrayNode('attributes')
                 ->info("xxx.")
                 ->ignoreExtraKeys(false)
-                ->variablePrototype()->end()
+                ->arrayPrototype()->children()
+                    ->scalarNode('label')->defaultNull()->end()
+                    ->scalarNode('format')->defaultNull()->end()
+
+                    ->arrayNode('attributes')
+                        ->ignoreExtraKeys(false)
+                    ->end()
+
+                ->end()->end()
+
             ->end()
             
         ->end()->end()
